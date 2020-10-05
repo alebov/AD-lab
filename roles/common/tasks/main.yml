@@ -1,0 +1,48 @@
+#- name: Ensure powershell installed
+#  win_chocolatey:
+#    name: powershell
+#    state: present
+#    version: 5.1.14409.20180811
+#    source: http://internal/odata/repo
+#  register: hotfix_result
+
+#- name: reboot host if required
+#  win_reboot:
+#  when: hotfix_result.reboot_required
+
+- name: Windows | Check for xRemoteDesktopAdmin Powershell module
+  win_psmodule:
+    name: xRemoteDesktopAdmin
+    state: present
+
+- name: Windows | Enable Remote Desktop
+  win_dsc:
+    resource_name: xRemoteDesktopAdmin
+    Ensure: present
+    UserAuthentication: Secure
+
+- name: Windows | Check for xNetworking Powershell module
+  win_psmodule:
+    name: xNetworking
+    state: present
+
+- name: Firewall | Allow RDP through Firewall
+  win_dsc:
+    resource_name: xFirewall
+    Name: "Administrator access for RDP (TCP-In)"
+    Ensure: present
+    Enabled: True
+    Profile: "Domain"
+    Direction: "Inbound"
+    Localport: "3389"
+    Protocol: "TCP"
+    Description: "Opens the listener port for RDP"#
+
+#- name: Change the hostname inventory_hostname
+#  win_hostname:
+#    name: "{{ inventory_hostname|upper }}"
+#  register: res
+
+#- name: Reboot
+#  win_reboot:
+#  when: res.reboot_required

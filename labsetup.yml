@@ -1,0 +1,3 @@
+---
+- import_playbook: domain_controller.yml
+- import_playbook: win_workstation.yml

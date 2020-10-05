@@ -1,0 +1,8 @@
+---
+- name: alebov.local Domain Controller configuration
+  hosts: domain_controller
+  serial: 1
+  roles:
+  - { role: somesoftware }
+  - { role: common }
+  - { role: domain_controller }

@@ -1,0 +1,17 @@
+[workstation]
+192.168.56.11
+
+[workstation:vars]
+ansible_user=vagrant
+ansible_password=vagrant
+ansible_connection=winrm
+ansible_winrm_server_cert_validation=ignore
+
+[domain_controller]
+192.168.56.10
+
+[domain_controller:vars]
+ansible_user=vagrant
+ansible_password=vagrant
+ansible_connection=winrm
+ansible_winrm_server_cert_validation=ignore

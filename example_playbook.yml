@@ -1,0 +1,45 @@
+---
+
+- name: Ensure 7-Zip is installed via Chocolatey
+  win_chocolatey:
+    name: 7zip
+    state: present
+
+- name: Ensure 7-Zip is not installed via Chocolatey
+  win_chocolatey:
+    name: 7zip
+    state: absent
+
+- name: Ensure each account is created
+  win_domain_user:
+    name: '{{ item.name }}'
+    upn: '{{ item.name }}@MY.DOMAIN.COM'
+    password: '{{ item.password }}'
+    password_never_expires: no
+    groups:
+    - Test User
+    - Application
+    company: Ansible
+    update_password: on_create
+  loop:
+  - name: testuser1
+    password: SecretPass123
+  - name: testuser2
+    password: SecretPass123
+
+- name: Run a command under PowerShell
+  win_shell: Get-Service -Name service | Stop-Service
+
+- name: Run a cmd command
+  win_command: cmd.exe /c <command>
+
+- name: Enable incoming Ping requests
+  win_command: cmd.exe /c netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow
+
+- name: Disable incoming Ping requests
+  win_command: cmd.exe /c netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=block
+
+- name: Reboot host if required
+  win_reboot:
+  when: update_result.reboot_required
+...

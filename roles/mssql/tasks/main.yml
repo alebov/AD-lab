@@ -1,0 +1,293 @@
+---
+#
+# Install SQL Developer Edition
+#
+
+# Load required powershell modules
+- name: Powershell | Check for SQLServer DSC Powershell module
+  win_psmodule:
+    name: SQLServerDsc
+    state: present
+
+- name: Powershell | Check for Storage DSC Powershell module
+  win_psmodule:
+    name: StorageDsc
+    state: present
+
+- name: Powershell | Check for ServerManager Powershell module
+  win_psmodule:
+    name: ServerManager
+    state: present
+
+- name: Powershell | Ensure that DBA Tools module is present
+  win_psmodule:
+    name: dbatools
+    state: present
+
+- name: Powershell | Check for xNetworking Powershell module
+  win_psmodule:
+    name: xNetworking
+    state: present
+
+- name: Windows | Install .NET Framework Core
+  win_feature:
+    name: NET-Framework-Core
+    state: present
+
+# Setup SQL Server Pre-Reqs
+- name: Windows | Install .NET Framework 3.5
+  win_feature:
+    name: NET-Framework-Features
+    state: present
+
+- name: Windows | Install .NET Framework 4.5 Features
+  win_feature:
+    name: NET-Framework-45-Features
+    state: present
+    include_sub_features: True
+
+- name: Windows | Install Windows Process Activation Service
+  win_feature:
+    name: WAS
+    state: present
+    include_sub_features: True
+
+# Setup service accounts
+#
+# We delegate this process to our domain controller since the required AD services are there for
+# win_domain_user to interact with. 
+- name: Active Directory | Ensure SQL Service account is present
+  win_domain_user:
+    name: "{{ mssql_sqlsvc_account | regex_search('[^\\\\]*$') }}"
+    firstname: "{{ mssql_instance_name }}"
+    surname: SQLSvc
+    password: "{{ mssql_sqlsvc_account_pass }}"
+    password_never_expires: yes
+    user_cannot_change_password: yes
+    description: "SQL Service account for {{ inventory_hostname }}\\{{ mssql_instance_name }}"
+    state: present
+    path: "{{ mssql_base_ldap_path }}"
+    groups:
+      - Domain Users
+  tags: service_account
+  delegate_to: "{{ domain_controller }}"
+
+- name: Active Directory | Ensure SQL Agent Service account is present
+  win_domain_user:
+    name: "{{ mssql_agentsvc_account | regex_search('[^\\\\]*$') }}"
+    firstname: "{{ mssql_instance_name }}"
+    surname: AgentSvc
+    password: "{{ mssql_agentsvc_account_pass }}"
+    password_never_expires: yes
+    user_cannot_change_password: yes
+    description: "SQL Agent service account for {{ inventory_hostname }}\\{{ mssql_instance_name }}"
+    state: present
+    path: "{{ mssql_base_ldap_path }}"
+    groups:
+      - Domain Users
+  delegate_to: "{{ domain_controller }}"
+  tags: service_account
+
+# SQL install may fail if a pending reboot is detected
+# Assuming we are allowed to reboot this step will check for pending reboots
+# and execute a reboot, reboot activity can be controlled using the variable mssql_suppress_reboot
+
+- name: Ensure that a reboot is not pending
+  when: ansible_reboot_pending
+  debug:
+    msg: 'Pending reboot detected'
+  changed_when: true
+  notify: reboot windows
+
+- meta: flush_handlers
+
+- name: Fetch SQL Media Downloader
+  win_get_url:
+    url: "{{ mssql_installation_source }}"
+    dest: "{{ mssql_temp_download_path }}\\SQLServer2017-SSEI-Dev.exe"
+
+- name: Use Media Downloader to fetch SQL Installation CABs to {{ mssql_installation_path }}
+  win_shell: "{{ mssql_temp_download_path }}\\SQLServer2017-SSEI-Dev.exe /Action=Download /MediaPath={{ mssql_installation_path }} /MediaType=CAB /Quiet"
+
+# Job will fail if extracted media folder is not empty, quick step to ensure it's empty
+- name: Ensure installation media extraction path is empty
+  win_file:
+    path: "{{ mssql_installation_path }}\\Media"
+    state: absent
+
+- name: Extract installation media
+  win_shell: "{{ mssql_installation_path }}\\SQLServer2017-DEV-x64-ENU.exe /X:{{ mssql_installation_path }}\\Media /Q"
+# If this step fails, logs are in C:\Program Files\Microsoft SQL Server\...\Setup Bootstrap\Log
+# it will often contain the actual error.  If it shows everything passing, the issue is within the DSC logs.
+# 
+# This module also typically throws this error fpr all failure conditions:
+# PowerShell DSC resource MSFT_SqlSetup  failed to execute Set-TargetResource functionality with error message: 
+# System.Exception: Test-TargetResource returned false after calling Set-TargetResource.
+#
+#
+# This document can also be useful to troubleshoot issues with DSC modules
+# https://docs.microsoft.com/en-us/powershell/dsc/troubleshooting 
+#
+# In particular completing these steps:
+# https://docs.microsoft.com/en-us/powershell/dsc/troubleshooting#gathering-events-from-a-single-dsc-operation
+# then re-running a failing PowershellDSC job can help you find the source of your error
+- name: Install SQL Server
+  win_dsc:
+    resource_name: SQLSetup
+    Action: Install
+    UpdateEnabled: True
+    SourcePath: "{{ mssql_installation_path }}\\Media"
+    InstanceName: "{{ mssql_instance_name }}"
+    InstallSharedDir: "{{ mssql_installshared_path }}"
+    InstallSharedwowDir: "{{ mssql_installsharedwow_path }}"
+    InstanceDir: "{{ mssql_instance_path }}"
+    InstallSQLDataDir: "{{ mssql_sqlinstalldata_path }}"
+    SQLUserDBDir: "{{ mssql_sqluserdata_path }}"
+    SQLUserDBLogDir: "{{ mssql_sqluserlog_path }}"
+    SQLTempDBDir: "{{ mssql_sqltempDB_path }}"
+    SQLTempDBLogDir: "{{ mssql_sqltempDBlog_path }}"
+    Features: "{{ mssql_features }}"
+    SQLCollation: "{{ mssql_collation }}"
+    BrowserSvcStartupType: "{{ mssql_browsersvc_mode }}"
+    SuppressReboot: "{{ mssql_suppress_reboot }}"
+    # Service Accounts
+    #
+    # If the type of the DSC resource option is a PSCredential then 
+    # there needs to be 2 options set in the Ansible task definition 
+    # suffixed with _username and _password. So we will be providing 
+    # two options for these normally single option items.
+
+    # SQL Service Account
+    SQLSvcAccount_username: "{{ mssql_sqlsvc_account }}"
+    SQLSvcAccount_password: "{{ mssql_sqlsvc_account_pass }}"
+    # SQL Agent Service Account
+    AgtSvcAccount_username: "{{ mssql_agentsvc_account }}"
+    AgtSvcAccount_password: "{{ mssql_agentsvc_account_pass }}"
+    # SQL Analysis Services Account
+    ASSvcAccount_username: "{{ mssql_assvc_account }}"
+    ASSvcAccount_password: "{{ mssql_assvc_account_pass }}"
+
+    # Used when installing on a network path, comment out 
+    # SourceCredential_username: "{{ ansible_user }}"
+    # SourceCredential_password: "{{ ansible_password }}"
+
+    # System Admins 
+    SQLSysAdminAccounts: "{{ mssql_sysadmin_accounts }}"
+    # Analysis Services Admins (if installed)
+    ASSysAdminAccounts: "{{ mssql_asadmin_accounts }}"
+  tags: install_sql
+
+# End of win_dsc for SQL Server
+
+# Firewall configuration
+- name: Firewall | Allow Database Engine for instance
+  win_dsc:
+    resource_name: xFirewall
+    Name: "SQL Server Database Engine instance {{ mssql_instance_name }}"
+    Program: sqlservr.exe 
+    Ensure: present
+    Enabled: True
+    Profile: "Domain"
+    Direction: "Inbound"
+    Action: Allow
+    Description: "Allows the Database Engine to access the network"  
+  tags: configure_firewall
+
+- name: Firewall | Allow SQLBrowser for instance
+  win_dsc:
+    resource_name: xFirewall
+    Name: "SQL Server Browser instance {{ mssql_instance_name }}"
+    Service: SQLBrowser
+    Ensure: present
+    Enabled: True
+    Profile: "Domain"
+    Direction: "Inbound"
+    Action: Allow
+    Description: "Allows the SQL Server Browser to access the network"  
+  tags: configure_firewall
+
+# Begin SQL Server configuration
+- name: Enable TCP Connectivity
+  win_dsc:
+    resource_name: SqlServerNetwork
+    InstanceName: "{{ mssql_instance_name }}"
+    ProtocolName: tcp
+    TcpPort: "{{ mssql_port }}"
+    IsEnabled: True
+    RestartService: True
+  tags: configure_sql
+
+- name: Adjust Max Server Memory to {{ mssql_max_server_memory }}
+  when: mssql_max_server_memory is defined
+  win_dsc:
+    resource_name: SqlServerConfiguration 
+    InstanceName: "{{ mssql_instance_name }}"
+    ServerName: "{{ ansible_hostname }}"
+    OptionName: max server memory (MB)
+    OptionValue: "{{ mssql_max_server_memory }}"
+    RestartService: False
+  tags: configure_sql
+  ignore_errors: yes
+
+- name: Adjust Min Server Memory to {{ mssql_min_server_memory }}
+  when: mssql_min_server_memory is defined
+  win_dsc:
+    resource_name: SqlServerConfiguration 
+    ServerName: "{{ ansible_hostname }}"
+    InstanceName: "{{ mssql_instance_name }}"
+    OptionName: min server memory (MB)
+    OptionValue: "{{ mssql_min_server_memory }}"
+  tags: configure_sql
+  ignore_errors: yes
+
+- name: Adjust Max Degree of Parallelism
+  when: mssql_max_degree_of_parallelism is defined
+  win_dsc:
+    resource_name: SqlServerConfiguration 
+    ServerName: "{{ ansible_hostname }}"
+    InstanceName: "{{ mssql_instance_name }}"
+    OptionName: max degree of parallelism
+    OptionValue: "{{ mssql_max_degree_of_parallelism }}"
+  tags: configure_sql
+  ignore_errors: yes
+
+- name: Install Chocolatey ... easy way to get SQL Server Management Studio
+  script: install.ps1
+
+- name: Install multiple packages sequentially
+  win_chocolatey:
+    name: '{{ item }}'
+    state: present
+  with_items:
+  - sql-server-management-studio
+  ignore_errors: yes
+
+- name: Copy over Database dump files ... CreateDatabase.sql
+  win_copy:
+    src: files/CreateDatabase.sql
+    dest: c:\tmp\
+
+- name: Copy over Database dump files ... CreateTable.sql
+  win_copy:
+    src: files/CreateTable.sql
+    dest: c:\tmp\
+
+#- name: Create a new database with name Clients
+#  mssql_db:
+#    name: "Clients"
+#    state: present
+#    login_host: "192.168.200.11"
+#    login_user: "HACKLAB\test_admin"
+#    login_password: "AutomationDoesW0rk!"
+
+#- name: Setup Clients database
+#  mssql_db:
+#    name: Clients
+#    state: import
+#    target: C:\tmp\CreateDatabase.sql
+
+#- name: Create the Clients Table
+#  mssql_db:
+#    name: Clients
+#    state: import
+#    target: C:\tmp\CreateTable.sql

@@ -1,0 +1,101 @@
+- name: Ensure that alebov.local domain exixts
+  win_domain:
+    dns_domain_name: alebov.local
+    safe_mode_password: StrongPass123
+  register: check_domain
+
+- name: Reboot to complete alebov.local domain creation
+  win_reboot:
+    shutdown_timeout: 600
+    reboot_timeout: 600
+    post_reboot_delay: 300
+  when: check_domain.changed
+
+- name: Ensure the server is a domain controller
+  win_domain_controller:
+    dns_domain_name: alebov.local
+    domain_admin_user: admin@alebov.local
+    domain_admin_password: StrongPass123
+    safe_mode_password: StrongPass123
+    state: domain_controller
+    log_path: C:\ansible_win_domain_controller.txt
+  register: check_domain_controller
+
+- name: Reboot to complete domain controller setup
+  win_reboot:
+    shutdown_timeout: 600
+    reboot_timeout: 600
+    post_reboot_delay: 300
+  when: check_domain_controller.changed
+
+- name: Check for xDnsServer Powershell module
+  win_psmodule:
+    name: xDnsServer
+    state: present
+
+- name: Configure DNS Forwarders
+  win_dsc:
+    resource_name: xDnsServerSetting
+    Name: DNSServerProperties
+    NoRecursion: false
+    Forwarders:
+      - "8.8.8.8"
+      - "8.8.4.4"
+
+- name: Ensure that Domain Admin admin@alebov.local is present in OU cn=Users,dc=ALEBOV,dc=local
+  win_domain_user:
+    name: admin
+    password: StrongPass123
+    state: present
+    path: cn=Users,dc=ALEBOV,dc=local
+    groups:
+      - Domain Admins
+
+- name: Create AllTeams group
+  win_domain_group:
+    name: allTeams
+    scope: global
+    path: DC=alebov,DC=local
+    state: present
+
+- name: Create DBAOracle
+  win_domain_group:
+    name: DBAOracle
+    scope: global
+    path: DC=alebov,DC=local
+    state: present
+
+- name: Create DBASQLServer
+  win_domain_group:
+    name: DBASQLServer
+    scope: global
+    path: DC=alebov,DC=local
+    state: present
+
+- name: Create DBAMongo group
+  win_domain_group:
+    name: DBAMongo
+    scope: global
+    path: DC=alebov,DC=local
+    state: present
+
+- name: Create DBARedis group
+  win_domain_group:
+    name: DBARedis
+    scope: global
+    path: DC=alebov,DC=local
+    state: present
+
+- name: Create DBAEnterprise Group ...
+  win_domain_group:
+    name: DBAEnterprise
+    scope: global
+    path: DC=alebov,DC=local
+    state: present
+
+- name: Create a Test Group ...
+  win_domain_group:
+    name: JustATestDemo
+    scope: global
+    path: DC=alebov,DC=local
+    state: present

@@ -1,0 +1,59 @@
+---
+- name: Ensure chocolatey is installed
+  win_chocolatey:
+    name:
+    - chocolatey
+    - chocolatey-core.extension
+    state: present
+
+- name: Ensure user bob is present
+  win_user:
+    name: bob
+    password: StrongPass123!
+    password_never_expires: yes
+    state: present
+#    groups:
+#      - Administrators
+
+- name: Ensure user alice is present
+  win_user:
+    name: alice
+    password: StrongPass123!
+    password_never_expires: yes
+    state: present
+
+- name: Ensure user Administrator is present with a valid password
+  win_user:
+    name: Administrator
+    password: StrongPass123!
+    password_never_expires: yes
+    state: present
+#    groups:
+#      - Administrators
+
+- name: disable enhanced exit codes
+  win_chocolatey_feature:
+    name: useEnhancedExitCodes
+    state: disabled
+
+- name: Install multiple packages sequentially
+  win_chocolatey:
+    name: '{{ item }}'
+    state: present
+  with_items:
+  - notepadplusplus
+  - putty
+  - python
+  - git
+  - 7zip
+  - sysinternals
+  - wget
+
+- name: Change the hostname to new_hostname
+  win_hostname:
+    name: domain-controller
+  register: win_hostname
+
+- name: Reboot
+  win_reboot:
+  when: win_hostname.reboot_required
