@@ -1,7 +1,7 @@
 - name: Ensure that alebov.local domain exixts
   win_domain:
     dns_domain_name: alebov.local
-    safe_mode_password: StrongPass123
+    safe_mode_password: StrongPass123!
   register: check_domain
 
 - name: Reboot to complete alebov.local domain creation
@@ -15,8 +15,8 @@
   win_domain_controller:
     dns_domain_name: alebov.local
     domain_admin_user: admin@alebov.local
-    domain_admin_password: StrongPass123
-    safe_mode_password: StrongPass123
+    domain_admin_password: StrongPass123!
+    safe_mode_password: StrongPass123!
     state: domain_controller
     log_path: C:\ansible_win_domain_controller.txt
   register: check_domain_controller
@@ -45,7 +45,7 @@
 - name: Ensure that Domain Admin admin@alebov.local is present in OU cn=Users,dc=ALEBOV,dc=local
   win_domain_user:
     name: admin
-    password: StrongPass123
+    password: StrongPass123!
     state: present
     path: cn=Users,dc=ALEBOV,dc=local
     groups:

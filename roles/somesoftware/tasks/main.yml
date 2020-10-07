@@ -12,8 +12,9 @@
     password: StrongPass123!
     password_never_expires: yes
     state: present
-#    groups:
-#      - Administrators
+    groups:
+      - Administrators
+  ignore_errors: yes
 
 - name: Ensure user alice is present
   win_user:
@@ -21,6 +22,9 @@
     password: StrongPass123!
     password_never_expires: yes
     state: present
+    groups:
+      - Administrators
+  ignore_errors: yes
 
 - name: Ensure user Administrator is present with a valid password
   win_user:
@@ -28,8 +32,9 @@
     password: StrongPass123!
     password_never_expires: yes
     state: present
-#    groups:
-#      - Administrators
+    groups:
+      - Administrators
+  ignore_errors: yes
 
 - name: disable enhanced exit codes
   win_chocolatey_feature:

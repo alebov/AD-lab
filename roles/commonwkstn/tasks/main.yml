@@ -26,6 +26,17 @@
     Protocol: "TCP"
     Description: "Opens the listener port for RDP"#
 
+- name: Set the region settings to Italian
+  win_region:
+    format: it-IT
+    unicode_language: it-IT
+    copy_settings: yes
+  register: reboot
+
+- name: Reboot
+  win_reboot:
+  when: reboot.restart_required
+
 #- name: Change the hostname inventory_hostname
 #  win_hostname:
 #    name: "{{ inventory_hostname|upper }}"

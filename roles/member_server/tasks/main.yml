@@ -2,7 +2,7 @@
   win_dns_client:
     adapter_names: '*'
     ipv4_addresses:
-    - 192.168.200.10
+    - 192.168.56.10
     log_path: C:\dns_log.txt
 
 - name: Verify File Server Role is installed.
@@ -11,17 +11,44 @@
     state: present
     include_management_tools: True
 
-- name: Install IIS Web-Server with sub features and management tools
+- name: Install IIS Management Features
   win_feature:
-    name: Web-Server
+    name: Web-Mgmt-Tools, 
+          Web-Mgmt-Console, 
+          Web-Scripting-Tools, 
+          Web-Mgmt-Service
     state: present
-    include_sub_features: yes
-    include_management_tools: yes
-  register: win_feature
 
-- name: reboot if installing web server feature requires it
-  win_reboot:
-  when: win_feature.reboot_required
+- name: Add SYSTEM allow rights to machine keys (required for installation of IIS 6 components)
+  win_acl:
+    path: C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys\
+    user: SYSTEM
+    rights: FullControl
+    type: allow
+    state: present
+    inherit: ContainerInherit, ObjectInherit
+    propagation: 'InheritOnly'
+
+- name: Install IIS 6 Compatibility Features 
+  win_feature:
+    name: Web-Mgmt-Compat,
+          Web-Metabase,
+          Web-Lgcy-Mgmt-Console,
+          Web-Lgcy-Scripting,
+          Web-WMI
+    state: present
+
+#- name: Install IIS Web-Server with sub features and management tools
+#  win_feature:
+#    name: Web-Server
+#    state: present
+#    include_sub_features: yes
+#    include_management_tools: yes
+#  register: win_feature
+
+#- name: reboot if installing web server feature requires it
+#  win_reboot:
+#  when: win_feature.reboot_required
 
 - name: Ensure directory structure for public share exists
   win_file:
@@ -40,7 +67,7 @@
 - name: add member server to alebov.local
   win_domain_membership:
     dns_domain_name: alebov.local
-    domain_admin_user: test_admin@alebov.local
+    domain_admin_user: admin@alebov.local
     domain_admin_password: StrongPass123!
     state: domain
   register: domain_state

@@ -3,6 +3,6 @@
   hosts: domain_controller
   serial: 1
   roles:
-  - { role: somesoftware }
-  - { role: common }
-  - { role: domain_controller }
+  - somesoftware
+  - common
+  - domain_controller

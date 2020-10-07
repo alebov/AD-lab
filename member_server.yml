@@ -1,0 +1,11 @@
+---
+
+- name: alebov.local server configuration
+  hosts: server
+
+  roles:
+    - common
+    - member_server
+    - mssql
+
+...

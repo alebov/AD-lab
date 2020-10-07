@@ -276,9 +276,9 @@
 #  mssql_db:
 #    name: "Clients"
 #    state: present
-#    login_host: "192.168.200.11"
-#    login_user: "HACKLAB\test_admin"
-#    login_password: "AutomationDoesW0rk!"
+#    login_host: "192.168.56.11"
+#    login_user: "ALEBOV\admin"
+#    login_password: "StrongPass123!"
 
 #- name: Setup Clients database
 #  mssql_db:
@@ -291,3 +291,4 @@
 #    name: Clients
 #    state: import
 #    target: C:\tmp\CreateTable.sql
+

@@ -1,4 +1,0 @@
-- name: Enable incoming Ping requests
-  hosts: all
-  tasks:
-  - win_command: cmd.exe /c netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow

@@ -4,7 +4,7 @@
   hosts: workstation
 
   roles:
-    - { role: commonwkstn }
+    - commonwkstn
 
   tasks:
 
@@ -33,7 +33,7 @@
     win_domain_membership:
       dns_domain_name: alebov.local
       domain_admin_user: admin@alebov.local
-      domain_admin_password: StrongPass123
+      domain_admin_password: StrongPass123!
       state: domain
     register: domain_state
 
