@@ -40,3 +40,11 @@
   - name: reboot workstation if needed
     win_reboot:
     when: domain_state.reboot_required
+
+  - name: Ensure that bob@alebov.local is present as local administrator
+    win_group_membership:
+      name: Administrators
+      Members:
+        - bob@ALEBOV.local
+      state: present
+

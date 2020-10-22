@@ -26,28 +26,23 @@
     Protocol: "TCP"
     Description: "Opens the listener port for RDP"#
 
-- name: Set the region settings to Italian
-  win_region:
-    format: it-IT
-    unicode_language: it-IT
-    copy_settings: yes
-  register: reboot
+- name: Change the hostname to workstation
+  win_hostname:
+    name: workstation
+  register: res
 
 - name: Reboot
+  # In case it stucks here saying "A system shutdown was in progress", reboot manually the vm and launch the playbook again
   win_reboot:
-  when: reboot.restart_required
+    reboot_timeout: 2000
+  when: res.reboot_required
 
-#- name: Change the hostname inventory_hostname
-#  win_hostname:
-#    name: "{{ inventory_hostname|upper }}"
-#  register: res
-
-#- name: Reboot
-#  win_reboot:
-#  when: res.reboot_required
-
-- name: Install Chocolatey ... easy way to get SQL Server Management Studio
-  script: install.ps1
+- name: Ensure chocolatey is installed
+  win_chocolatey:
+    name:
+    - chocolatey
+    - chocolatey-core.extension
+    state: present
 
 - name: Install multiple packages sequentially
   win_chocolatey:
@@ -56,3 +51,22 @@
   with_items:
   - notepadplusplus
   - git
+  - pstools
+
+- name: Check if mimikatz exists
+  win_stat:
+    path: C:\mimikatz.zip
+  register: mimikatz
+
+- name: Download mimikatz if it does not exists
+  win_shell: Invoke-WebRequest -Uri https://github.com/gentilkiwi/mimikatz/releases/download/2.2.0-20200918-fix/mimikatz_trunk.zip -OutFile C:\mimikatz.zip
+  when: not mimikatz.stat.exists
+
+- name: Check if kerberoast exists
+  win_stat:
+    path: C:\kerberoast
+  register: kerberoast
+
+- name: Clone kerberoast repo if it does not exists
+  win_shell: git clone https://github.com/nidem/kerberoast.git C:\kerberoast
+  when: not kerberoast.stat.exists

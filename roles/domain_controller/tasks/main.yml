@@ -1,3 +1,11 @@
+- name: Ensure that Administrator is present with a valid password
+  win_user:
+    name: Administrator
+    password: StrongPass123!
+    password_never_expires: yes
+    state: present
+  ignore_errors: yes
+
 - name: Ensure that alebov.local domain exixts
   win_domain:
     dns_domain_name: alebov.local
@@ -14,7 +22,7 @@
 - name: Ensure the server is a domain controller
   win_domain_controller:
     dns_domain_name: alebov.local
-    domain_admin_user: admin@alebov.local
+    domain_admin_user: Administrator@alebov.local
     domain_admin_password: StrongPass123!
     safe_mode_password: StrongPass123!
     state: domain_controller
@@ -42,14 +50,35 @@
       - "8.8.8.8"
       - "8.8.4.4"
 
-- name: Ensure that Domain Admin admin@alebov.local is present in OU cn=Users,dc=ALEBOV,dc=local
+- name: Ensure that admin@alebov.local is present as Domain Admin
   win_domain_user:
     name: admin
     password: StrongPass123!
+    password_never_expires: yes
     state: present
     path: cn=Users,dc=ALEBOV,dc=local
     groups:
       - Domain Admins
+
+- name: Ensure that bob@alebov.local is present in OU cn=Users,dc=ALEBOV,dc=local
+  win_domain_user:
+    name: bob
+    password: StrongPass123!
+    password_never_expires: yes
+    state: present
+    path: cn=Users,dc=ALEBOV,dc=local
+    groups:
+      - Users
+
+- name: Ensure that alice@alebov.local is present in OU cn=Users,dc=ALEBOV,dc=local
+  win_domain_user:
+    name: alice
+    password: StrongPass123!
+    password_never_expires: yes
+    state: present
+    path: cn=Users,dc=ALEBOV,dc=local
+    groups:
+      - Users
 
 - name: Create AllTeams group
   win_domain_group:

@@ -1,15 +1,3 @@
-#- name: Ensure powershell installed
-#  win_chocolatey:
-#    name: powershell
-#    state: present
-#    version: 5.1.14409.20180811
-#    source: http://internal/odata/repo
-#  register: hotfix_result
-
-#- name: reboot host if required
-#  win_reboot:
-#  when: hotfix_result.reboot_required
-
 - name: Windows | Check for xRemoteDesktopAdmin Powershell module
   win_psmodule:
     name: xRemoteDesktopAdmin
@@ -37,19 +25,3 @@
     Localport: "3389"
     Protocol: "TCP"
     Description: "Opens the listener port for RDP"#
-
-- name: Set the region settings to Italian
-  win_region:
-    format: it-IT
-    unicode_language: it-IT
-    copy_settings: yes
-  register: reboot
-
-#- name: Change the hostname inventory_hostname
-#  win_hostname:
-#    name: "{{ inventory_hostname|upper }}"
-#  register: reboot
-
-- name: Reboot
-  win_reboot:
-  when: reboot.restart_required

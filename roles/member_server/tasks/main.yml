@@ -1,3 +1,12 @@
+- name: Change the hostname to member-server
+  win_hostname:
+    name: member-server
+  register: win_hostname
+
+- name: Reboot if needed
+  win_reboot:
+  when: win_hostname.reboot_required
+
 - name: Set configure dns
   win_dns_client:
     adapter_names: '*'
@@ -64,7 +73,7 @@
     full: Administrators
     change: Users
 
-- name: add member server to alebov.local
+- name: Add member server to alebov.local
   win_domain_membership:
     dns_domain_name: alebov.local
     domain_admin_user: admin@alebov.local
@@ -72,6 +81,15 @@
     state: domain
   register: domain_state
 
-- name: reboot member server if needed
+- name: Check if mimikatz exists
+  win_stat:
+    path: C:\mimikatz.zip
+  register: mimikatz
+
+- name: Download mimikatz if it does not exists
+  win_shell: Invoke-WebRequest -Uri https://github.com/gentilkiwi/mimikatz/releases/download/2.2.0-20200918-fix/mimikatz_trunk.zip -OutFile C:\mimikatz.zip
+  when: not mimikatz.stat.exists
+
+- name: Reboot if needed
   win_reboot:
   when: domain_state.reboot_required
