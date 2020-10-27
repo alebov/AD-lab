@@ -1,8 +1,7 @@
 ---
-- name: alebov.local Domain Controller configuration
+- name: cyberloop.local Domain Controller configuration
   hosts: domain_controller
   serial: 1
   roles:
-  - somesoftware
   - common
   - domain_controller

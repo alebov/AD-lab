@@ -73,10 +73,10 @@
     full: Administrators
     change: Users
 
-- name: Add member server to alebov.local
+- name: Add member server to cyberloop.local
   win_domain_membership:
-    dns_domain_name: alebov.local
-    domain_admin_user: admin@alebov.local
+    dns_domain_name: cyberloop.local
+    domain_admin_user: admin@cyberloop.local
     domain_admin_password: StrongPass123!
     state: domain
   register: domain_state

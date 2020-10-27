@@ -1,6 +1,6 @@
 ---
 
-- name: alebov.local server configuration
+- name: cyberloop.local server configuration
   hosts: server
 
   roles:

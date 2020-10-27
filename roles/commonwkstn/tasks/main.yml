@@ -24,7 +24,7 @@
     Direction: "Inbound"
     Localport: "3389"
     Protocol: "TCP"
-    Description: "Opens the listener port for RDP"#
+    Description: "Opens the listener port for RDP"
 
 - name: Change the hostname to workstation
   win_hostname:

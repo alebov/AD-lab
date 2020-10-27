@@ -1,6 +1,6 @@
 ---
 
-- name: alebov.local workstation configuration
+- name: cyberloop.local workstation configuration
   hosts: workstation
 
   roles:
@@ -29,10 +29,10 @@
       full: Administrators
       change: Users
 
-  - name: add windows 10 workstation to alebov.local
+  - name: add windows 10 workstation to cyberloop.local
     win_domain_membership:
-      dns_domain_name: alebov.local
-      domain_admin_user: admin@alebov.local
+      dns_domain_name: cyberloop.local
+      domain_admin_user: admin@cyberloop.local
       domain_admin_password: StrongPass123!
       state: domain
     register: domain_state
@@ -41,10 +41,10 @@
     win_reboot:
     when: domain_state.reboot_required
 
-  - name: Ensure that bob@alebov.local is present as local administrator
+  - name: Ensure that bob@cyberloop.local is present as local administrator
     win_group_membership:
       name: Administrators
       Members:
-        - bob@ALEBOV.local
+        - bob@CYBERLOOP.local
       state: present
 

@@ -19,7 +19,7 @@ Vagrant will be needed to provision the virtual machines and ansible to automate
 
 ### Setup
 
-The default domain will be alebov/local, on the subnet 192.168.56.1/24 and each machine has only been allocated with 1024MB of memory. If you want to change some of these settings some small modifications are required inside the configuration files.
+The default domain will be cyberloop/local, on the subnet 192.168.56.1/24 and each machine has only been allocated with 1024MB of memory. If you want to change some of these settings some small modifications are required inside the configuration files.
 
 To have the lab up and running the two commands you need to run are:
 - `vagrant up`

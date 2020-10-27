@@ -277,7 +277,7 @@
 #    name: "Clients"
 #    state: present
 #    login_host: "192.168.56.11"
-#    login_user: "ALEBOV\admin"
+#    login_user: "CYBERLOOP\admin"
 #    login_password: "StrongPass123!"
 
 #- name: Setup Clients database
