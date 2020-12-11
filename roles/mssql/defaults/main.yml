@@ -7,7 +7,7 @@ mssql_installation_path: C:\SQLInstall
 # Temporary path to store downloader
 mssql_temp_download_path: C:\tmp
 
-# instance details ALEBOV
+# instance details CYBERLOOP
 mssql_instance_name: Test
 mssql_drive: C
 mssql_userdbvol_name: Userdbvol01
@@ -32,17 +32,17 @@ mssql_suppress_reboot: False
 
 ### Service Accounts ###
 
-mssql_base_ldap_path: "cn=Users,dc=alebov,dc=local"
+mssql_base_ldap_path: "cn=Users,dc=cyberloop,dc=local"
 domain_controller: "192.168.56.10"
 
 # SQL Service Account
-# regex statements used in some steps expect the format of ALEBOV\
-# do not use @ALEBOV.local for these accounts as SQL install will fail
-mssql_sqlsvc_account: ALEBOV\sql_svc
+# regex statements used in some steps expect the format of CYBERLOOP\
+# do not use @CYBERLOOP.local for these accounts as SQL install will fail
+mssql_sqlsvc_account: CYBERLOOP\sql_svc
 mssql_sqlsvc_account_pass: StrongPass123!
 
 # SQL Agent Service Account
-mssql_agentsvc_account: ALEBOV\sql_agt
+mssql_agentsvc_account: CYBERLOOP\sql_agt
 mssql_agentsvc_account_pass: StrongPass123!
 
 # SQL Analysis Services Account
@@ -122,8 +122,8 @@ mssql_browsersvc_mode: Automatic
 # Default Account Access
 # Ansible_Admin must be included so that the playbook can make configuration changes post install
 mssql_sysadmin_accounts: 
-  - ALEBOV\Domain Admins
-  - ALEBOV\Administrator
+  - CYBERLOOP\Domain Admins
+  - CYBERLOOP\Administrator
 
 # Analysis Services Admins (if installed)
 mssql_asadmin_accounts: "{{ mssql_sysadmin_accounts }}"
