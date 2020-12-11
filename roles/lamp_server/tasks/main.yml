@@ -1,0 +1,50 @@
+- name: Install lamp components
+  apt:
+    name: ['apache2', 'mysql-server', 'php', 'libapache2-mod-php', 'php-mysql']
+    state: present
+  become: yes
+
+#- name: Run mysql_secure_installation
+
+- name: Create virtual host
+  file:
+    path: /var/www/cyberloop
+    state: directory
+    owner: cyberloop
+    group: cyberloop
+  become: yes
+
+- name: Copy configuration file into apache's sites-available directory
+  copy:
+    src: cyberloop.conf
+    dest: /etc/apache2/sites-available/cyberloop.conf
+  become: yes
+
+- name: Enable new virtual host
+  shell: a2ensite cyberloop
+  become: yes
+  register: apache1
+
+- name: Disable default apache website
+  shell: a2dissite 000-default
+  become: yes
+  register: apache2
+
+- name: Reload apache service if needed
+  systemd:
+    name: apache2
+    state: reloaded
+  when: (apache1.changed) or (apache2.changed)
+  become: yes
+  
+- name: Copy index.html for the website
+  copy:
+    src: index.html
+    dest: /var/www/cyberloop/index.html
+  become: yes
+
+- name: Copy info.php for the website
+  copy:
+    src: info.php
+    dest: /var/www/cyberloop/info.php
+  become: yes

@@ -47,18 +47,6 @@
           Web-WMI
     state: present
 
-#- name: Install IIS Web-Server with sub features and management tools
-#  win_feature:
-#    name: Web-Server
-#    state: present
-#    include_sub_features: yes
-#    include_management_tools: yes
-#  register: win_feature
-
-#- name: reboot if installing web server feature requires it
-#  win_reboot:
-#  when: win_feature.reboot_required
-
 - name: Ensure directory structure for public share exists
   win_file:
     path: C:\shares\public
@@ -76,19 +64,10 @@
 - name: Add member server to cyberloop.local
   win_domain_membership:
     dns_domain_name: cyberloop.local
-    domain_admin_user: admin@cyberloop.local
+    domain_admin_user: Administrator@cyberloop.local
     domain_admin_password: StrongPass123!
     state: domain
   register: domain_state
-
-- name: Check if mimikatz exists
-  win_stat:
-    path: C:\mimikatz.zip
-  register: mimikatz
-
-- name: Download mimikatz if it does not exists
-  win_shell: Invoke-WebRequest -Uri https://github.com/gentilkiwi/mimikatz/releases/download/2.2.0-20200918-fix/mimikatz_trunk.zip -OutFile C:\mimikatz.zip
-  when: not mimikatz.stat.exists
 
 - name: Reboot if needed
   win_reboot:

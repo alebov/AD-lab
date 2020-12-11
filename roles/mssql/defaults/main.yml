@@ -33,7 +33,7 @@ mssql_suppress_reboot: False
 ### Service Accounts ###
 
 mssql_base_ldap_path: "cn=Users,dc=cyberloop,dc=local"
-domain_controller: "192.168.56.10"
+domain_controller: "{{ dc_ip }}"
 
 # SQL Service Account
 # regex statements used in some steps expect the format of CYBERLOOP\

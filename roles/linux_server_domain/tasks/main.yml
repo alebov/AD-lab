@@ -1,0 +1,37 @@
+- name: Change file /etc/systemd/resolved.conf
+  template:
+    src: resolved.conf.j2
+    dest: /etc/systemd/resolved.conf
+  register: file1
+  become: yes
+
+- name: Change hostname
+  lineinfile:
+    path: /etc/hostname
+    regexp: "localhost"
+    line: "ubuntu-domain"
+  register: file2
+  become: yes
+
+- name: Reboot needed
+  reboot:
+  when: (file1.changed) or (file2.changed)
+  become: yes
+
+- name: Check if you have already joined the domain
+  shell: realm list
+  register: response
+
+- name: Join cyberloop.local domain
+  expect:
+    command: "realm join {{ domain }}"
+    responses:
+      "Password for Administrator:": "{{ Administrator_pass }}"
+  when: '"cyberloop.local" not in response.stdout_lines' 
+  become: yes
+
+- name: Modify /etc/pam.d/common-account to create home dir automatically when logging in with AD users
+  copy:
+    src: common-account
+    dest: /etc/pam.d/common-account
+  become: yes

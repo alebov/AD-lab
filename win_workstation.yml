@@ -1,7 +1,7 @@
 ---
 
 - name: cyberloop.local workstation configuration
-  hosts: workstation
+  hosts: win_workstation
 
   roles:
     - commonwkstn
@@ -12,7 +12,7 @@
     win_dns_client:
       adapter_names: '*'
       ipv4_addresses:
-      - 192.168.56.10
+      - "{{ dc_ip }}"
       log_path: C:\dns_log.txt
 
   - name: Ensure directory structure for public share exists
@@ -32,8 +32,8 @@
   - name: add windows 10 workstation to cyberloop.local
     win_domain_membership:
       dns_domain_name: cyberloop.local
-      domain_admin_user: admin@cyberloop.local
-      domain_admin_password: StrongPass123!
+      domain_admin_user: Administrator@cyberloop.local
+      domain_admin_password: "{{ Administrator_pass }}"
       state: domain
     register: domain_state
 

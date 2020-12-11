@@ -3,6 +3,23 @@
 # Install SQL Developer Edition
 #
 
+- name: Windows | Install .NET Framework Core
+  win_feature:
+    name: NET-Framework-Core
+    state: present
+
+# Setup SQL Server Pre-Reqs
+- name: Windows | Install .NET Framework 3.5
+  win_feature:
+    name: NET-Framework-Features
+    state: present
+
+- name: Windows | Install .NET Framework 4.5 Features
+  win_feature:
+    name: NET-Framework-45-Features
+    state: present
+    include_sub_features: True
+
 # Load required powershell modules
 - name: Powershell | Check for SQLServer DSC Powershell module
   win_psmodule:
@@ -28,23 +45,6 @@
   win_psmodule:
     name: xNetworking
     state: present
-
-- name: Windows | Install .NET Framework Core
-  win_feature:
-    name: NET-Framework-Core
-    state: present
-
-# Setup SQL Server Pre-Reqs
-- name: Windows | Install .NET Framework 3.5
-  win_feature:
-    name: NET-Framework-Features
-    state: present
-
-- name: Windows | Install .NET Framework 4.5 Features
-  win_feature:
-    name: NET-Framework-45-Features
-    state: present
-    include_sub_features: True
 
 - name: Windows | Install Windows Process Activation Service
   win_feature:

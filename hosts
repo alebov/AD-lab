@@ -7,20 +7,26 @@ ansible_password=vagrant
 ansible_connection=winrm
 ansible_winrm_server_cert_validation=ignore
 
-[server]
+[win_server]
 192.168.56.11
 
-[server:vars]
+[win_server:vars]
 ansible_user=vagrant
 ansible_password=vagrant
 ansible_connection=winrm
 ansible_winrm_server_cert_validation=ignore
 
-[workstation]
+[win_workstation]
 192.168.56.12
 
-[workstation:vars]
+[win_workstation:vars]
 ansible_user=vagrant
 ansible_password=vagrant
 ansible_connection=winrm
 ansible_winrm_server_cert_validation=ignore
+
+[ubuntu_domain]
+192.168.56.13
+
+[ubuntu_outside]
+192.168.56.14

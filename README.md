@@ -1,9 +1,11 @@
 # Active Directory Lab
 
-This lab is made of three virtual machines:
+This lab is made of five virtual machines:
 - **Domain controller** running on Windows Server 2019
 - **Member server** with a Microsoft ISS web-server and a Microsoft SQL server
 - **Windows workstation** running on Windows 10
+- **Linux server inside the domain** running on Ubuntu 20.04 LTS
+- **Linux server outside the domain** running on Ubuntu 20.04 LTS
 
 The lab setup is automated using vagrant and ansible automation tools.
 
@@ -23,8 +25,16 @@ The default domain will be cyberloop/local, on the subnet 192.168.56.1/24 and ea
 
 To have the lab up and running the two commands you need to run are:
 - `vagrant up`
-- `ansible-playbook -i hosts --user=vagrant labsetup.yml`
+- `ansible-playbook -i hosts labsetup.yml`
+
+If you run into some problems while running the main playbook, you can also the indipendent playbooks:
+- `ansible-playbook -i hosts domain_controller.yml`
+- `ansible-playbook -i hosts member_server.yml`
+- `ansible-playbook -i hosts win_workstation.yml`
+- `ansible-playbook -i hosts linux_srv_domain.yml`
+- `ansible-playbook -i hosts linux_srv_no_domain.yml`
+
 
 ### Thanks to
 
-This repo is based on the work of [jckhmr](https://github.com/jckhmr/adlab) and [kkolk](https://github.com/kkolk/mssql). I had to do some changes to have the lab working properly for my configuration, but the majority is copied and pasted from their repos.
+This repo is based on the work of [jckhmr](https://github.com/jckhmr/adlab) and [kkolk](https://github.com/kkolk/mssql).

@@ -26,9 +26,9 @@
     Protocol: "TCP"
     Description: "Opens the listener port for RDP"
 
-- name: Change the hostname to workstation
+- name: Change the hostname to win-workstation-1
   win_hostname:
-    name: workstation
+    name: win-workstation-1
   register: res
 
 - name: Reboot
@@ -52,21 +52,3 @@
   - notepadplusplus
   - git
   - pstools
-
-- name: Check if mimikatz exists
-  win_stat:
-    path: C:\mimikatz.zip
-  register: mimikatz
-
-- name: Download mimikatz if it does not exists
-  win_shell: Invoke-WebRequest -Uri https://github.com/gentilkiwi/mimikatz/releases/download/2.2.0-20200918-fix/mimikatz_trunk.zip -OutFile C:\mimikatz.zip
-  when: not mimikatz.stat.exists
-
-- name: Check if kerberoast exists
-  win_stat:
-    path: C:\kerberoast
-  register: kerberoast
-
-- name: Clone kerberoast repo if it does not exists
-  win_shell: git clone https://github.com/nidem/kerberoast.git C:\kerberoast
-  when: not kerberoast.stat.exists

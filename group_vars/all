@@ -1,0 +1,21 @@
+domain: cyberloop.local
+
+# Passwords
+
+Administrator_pass: StrongPass123!
+admin_pass: StrongPass123!
+bob_pass: StrongPass123!
+alice_pass: StrongPass123!
+vagrant_pass: vagrant
+
+# IP addresses
+
+dc_ip: 192.168.56.10
+
+# Hostnames
+
+dc_hostname: domain-controller
+#linux_hostname: ubuntu-domain
+#linux_hostname: ubuntu-outside
+#win_hostname: win-server
+#win_hostname: win-workstation

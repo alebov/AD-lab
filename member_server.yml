@@ -1,7 +1,7 @@
 ---
 
 - name: cyberloop.local server configuration
-  hosts: server
+  hosts: win_server
 
   roles:
     - common

@@ -24,18 +24,9 @@
   - wget
   - pstools
 
-- name: Check if mimikatz exists
-  win_stat:
-    path: C:\mimikatz.zip
-  register: mimikatz
-
-- name: Download mimikatz if it does not exists
-  win_shell: Invoke-WebRequest -Uri https://github.com/gentilkiwi/mimikatz/releases/download/2.2.0-20200918-fix/mimikatz_trunk.zip -OutFile C:\mimikatz.zip
-  when: not mimikatz.stat.exists
-
-- name: Change the hostname to dc01
+- name: Change the hostname to domain-controller
   win_hostname:
-    name: dc01
+    name: domain-controller
   register: win_hostname
 
 - name: Reboot
@@ -58,9 +49,6 @@
 
 - name: Reboot to complete cyberloop.local domain creation
   win_reboot:
-    shutdown_timeout: 600
-    reboot_timeout: 600
-    post_reboot_delay: 300
   when: check_domain.changed
 
 - name: Ensure the server is a domain controller
@@ -75,9 +63,6 @@
 
 - name: Reboot to complete domain controller setup
   win_reboot:
-    shutdown_timeout: 600
-    reboot_timeout: 600
-    post_reboot_delay: 300
   when: check_domain_controller.changed
 
 - name: Check for xDnsServer Powershell module

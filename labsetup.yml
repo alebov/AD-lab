@@ -2,4 +2,6 @@
 - import_playbook: domain_controller.yml
 - import_playbook: win_workstation.yml
 - import_playbook: member_server.yml
+- import_playbook: linux_srv_domain.yml
+- import_playbook: linux_srv_no_domain.yml
 ...
